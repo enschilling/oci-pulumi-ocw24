@@ -1,0 +1,32 @@
+name: static-website
+runtime: yaml
+description: A minimal Pulumi YAML program
+
+environment:
+  - oci-pulumi-self-service
+
+resources:
+  bucket:
+    type: oci:ObjectStorage:Bucket
+    properties:
+      compartmentId: ${compartmentId}
+      namespace: ${namespace.namespace}
+      accessType: "ObjectReadWithoutList"
+
+  object:
+    type: oci:ObjectStorage:StorageObject
+    properties:
+      bucket: ${bucket.name}
+      namespace: ${namespace.namespace}
+      object: "index.html"
+      content: |
+        <h2>hello, world1</h2>
+      contentType: "text/html"
+
+variables:
+  compartmentId: ocid1.compartment.oc1..aaaaaaaazirnqfa2cqcihnqkwkznvfdnubw2t4tmbqwlrc3c2bqjcxbdai6a
+  namespace:
+    fn::oci:ObjectStorage/getNamespace:getNamespace:
+
+outputs:
+  bucketURL: https://${bucket.namespace}.objectstorage.${oci:region}.oci.customer-oci.com/n/${bucket.namespace}/b/${bucket.name}/o/${object.object}
